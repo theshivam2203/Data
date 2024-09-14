@@ -140,4 +140,4 @@ The application provides the following outputs:
 
 ## License
 
-This project is licensed under the Runita.
+This project is licensed under Runita.
