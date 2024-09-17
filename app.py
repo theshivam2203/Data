@@ -73,15 +73,47 @@ def create_formatted_result_sheet(frequency_combined_df):
 
 
 # Function to save the result to Excel, updating existing sheets or adding new ones
+# def to_excel_with_updates(original_sheets, result_df, frequency_combined_df, formatted_result_df):
+#     output = BytesIO()
+#     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+#         for sheet_name, sheet_df in original_sheets.items():
+#             if sheet_name == 'Predictions':
+#                 sheet_df = result_df  # Update the 'Predictions' sheet
+#             elif sheet_name == 'Frequency_Counts':
+#                 sheet_df = frequency_combined_df  # Update the 'Frequency_Counts' sheet
+#             sheet_df.to_excel(writer, index=False, sheet_name=sheet_name)
+        
+#         # Add new sheets if they don't exist
+#         if 'Predictions' not in original_sheets:
+#             result_df.to_excel(writer, index=False, sheet_name='Predictions')
+#         if 'Frequency_Counts' not in original_sheets:
+#             frequency_combined_df.to_excel(writer, index=False, sheet_name='Frequency_Counts')
+
+#         # Add the formatted result sheet
+#         formatted_result_df.to_excel(writer, index=False, sheet_name='Result')
+
+#     processed_data = output.getvalue()
+#     return processed_data
+
+# Function to save the result to Excel, updating existing sheets or adding new ones
 def to_excel_with_updates(original_sheets, result_df, frequency_combined_df, formatted_result_df):
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        # Write the first sheet (Sheet1) and then add Sheet2 immediately after
+        if 'Sheet1' in original_sheets:
+            original_sheets['Sheet1'].to_excel(writer, index=False, sheet_name='Sheet1')
+        
+        if 'Sheet2' in original_sheets:
+            original_sheets['Sheet2'].to_excel(writer, index=False, sheet_name='Sheet2')
+        
+        # Add or update existing sheets with predictions and frequency counts
         for sheet_name, sheet_df in original_sheets.items():
             if sheet_name == 'Predictions':
                 sheet_df = result_df  # Update the 'Predictions' sheet
             elif sheet_name == 'Frequency_Counts':
                 sheet_df = frequency_combined_df  # Update the 'Frequency_Counts' sheet
-            sheet_df.to_excel(writer, index=False, sheet_name=sheet_name)
+            if sheet_name not in ['Sheet1', 'Sheet2']:  # Avoid writing Sheet1 and Sheet2 again
+                sheet_df.to_excel(writer, index=False, sheet_name=sheet_name)
         
         # Add new sheets if they don't exist
         if 'Predictions' not in original_sheets:
@@ -91,6 +123,10 @@ def to_excel_with_updates(original_sheets, result_df, frequency_combined_df, for
 
         # Add the formatted result sheet
         formatted_result_df.to_excel(writer, index=False, sheet_name='Result')
+
+        # Add Sheet2 again after Result
+        if 'Sheet2' in original_sheets:
+            original_sheets['Sheet2'].to_excel(writer, index=False, sheet_name='Regression')
 
     processed_data = output.getvalue()
     return processed_data
